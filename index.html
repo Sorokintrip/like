@@ -335,7 +335,7 @@
             <div class="comments-title">Комментарии</div>
             
             <div class="comment-form">
-                <textarea class="comment-input" id="commentInput" placeholder="Оставьте ваш комментарий..."></textarea>
+                <textarea class="comment-input" id="commentInput" placeholder="Оставьте вашъ комментарий..."></textarea>
                 <button class="comment-submit" onclick="addComment()">Отправить</button>
             </div>
             
@@ -356,10 +356,17 @@
             { name: "Крупская", class: "author-krupskaya" }
         ];
 
+        // Ключи для localStorage
+        const STORAGE_KEYS = {
+            LIKES: 'global_likes',
+            DISLIKES: 'global_dislikes', 
+            COMMENTS: 'global_comments'
+        };
+
         // Инициализация данных из localStorage
-        let likes = localStorage.getItem('likes') ? parseInt(localStorage.getItem('likes')) : 0;
-        let dislikes = localStorage.getItem('dislikes') ? parseInt(localStorage.getItem('dislikes')) : 0;
-        let comments = JSON.parse(localStorage.getItem('comments')) || [
+        let likes = localStorage.getItem(STORAGE_KEYS.LIKES) ? parseInt(localStorage.getItem(STORAGE_KEYS.LIKES)) : 0;
+        let dislikes = localStorage.getItem(STORAGE_KEYS.DISLIKES) ? parseInt(localStorage.getItem(STORAGE_KEYS.DISLIKES)) : 0;
+        let comments = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMMENTS)) || [
             { author: "Ленин", authorClass: "author-lenin", text: "Всякая революция лишь тогда чего-нибудь стоит, если она умеет защищаться!" },
             { author: "Сталин", authorClass: "author-stalin", text: "Жить стало лучше, жить стало веселее!" },
             { author: "Троцкий", authorClass: "author-trotsky", text: "Революция не бывает без жертв!" },
@@ -412,7 +419,7 @@
         function handleLike() {
             // Увеличиваем общий счетчик лайков
             likes++;
-            localStorage.setItem('likes', likes);
+            localStorage.setItem(STORAGE_KEYS.LIKES, likes);
             
             // Показываем спойлер
             showSpoiler();
@@ -422,20 +429,22 @@
             
             // Обновляем состояние кнопки
             document.getElementById('likeBtn').classList.add('liked');
-            document.getElementById('likeBtn').textContent = '❤️ Лайкъ поставлен';
+            document.getElementById('likeBtn').textContent = '❤️ Лайкъ';
+            document.getElementById('likeBtn').disabled = true;
         }
 
         function handleDislike() {
             // Увеличиваем общий счетчик дизлайков
             dislikes++;
-            localStorage.setItem('dislikes', dislikes);
+            localStorage.setItem(STORAGE_KEYS.DISLIKES, dislikes);
             
             // Обновляем отображение счетчика
             updateRatingDisplay();
             
             // Обновляем состояние кнопки
             document.getElementById('dislikeBtn').classList.add('disliked');
-            document.getElementById('dislikeBtn').textContent = '👎 Дизлайкъ поставлен';
+            document.getElementById('dislikeBtn').textContent = '👎 Дизлайкъ';
+            document.getElementById('dislikeBtn').disabled = true;
         }
 
         function updateRatingDisplay() {
@@ -459,11 +468,12 @@
             const newComment = {
                 author: randomAuthor.name,
                 authorClass: randomAuthor.class,
-                text: text
+                text: text,
+                timestamp: new Date().toISOString()
             };
             
             comments.push(newComment);
-            localStorage.setItem('comments', JSON.stringify(comments));
+            localStorage.setItem(STORAGE_KEYS.COMMENTS, JSON.stringify(comments));
             
             // Очищаем поле ввода и обновляем список комментариев
             commentInput.value = '';
