@@ -323,11 +323,11 @@
         <div class="rating-container">
             <div class="rating-item">
                 <div class="rating-count" id="likeCount">0</div>
-                <button class="like-btn" id="likeBtn" onclick="handleLike()">❤️ Лайк</button>
+                <button class="like-btn" id="likeBtn" onclick="handleLike()">❤️ Лайкъ</button>
             </div>
             <div class="rating-item">
                 <div class="rating-count" id="dislikeCount">0</div>
-                <button class="dislike-btn" id="dislikeBtn" onclick="handleDislike()">👎 Дизлайк</button>
+                <button class="dislike-btn" id="dislikeBtn" onclick="handleDislike()">👎 Дизлайкъ</button>
             </div>
         </div>
         
@@ -356,12 +356,9 @@
             { name: "Крупская", class: "author-krupskaya" }
         ];
 
-        // Инициализация данных
+        // Инициализация данных из localStorage
         let likes = localStorage.getItem('likes') ? parseInt(localStorage.getItem('likes')) : 0;
         let dislikes = localStorage.getItem('dislikes') ? parseInt(localStorage.getItem('dislikes')) : 0;
-        let userLikes = localStorage.getItem('userLikes') ? parseInt(localStorage.getItem('userLikes')) : 0;
-        let userDislikes = localStorage.getItem('userDislikes') ? parseInt(localStorage.getItem('userDislikes')) : 0;
-        
         let comments = JSON.parse(localStorage.getItem('comments')) || [
             { author: "Ленин", authorClass: "author-lenin", text: "Всякая революция лишь тогда чего-нибудь стоит, если она умеет защищаться!" },
             { author: "Сталин", authorClass: "author-stalin", text: "Жить стало лучше, жить стало веселее!" },
@@ -385,7 +382,6 @@
             // Всегда показываем общие счетчики и комментарии
             updateRatingDisplay();
             displayComments();
-            updateButtonStates();
             
             // Автоматический запрос полноэкранного режима при загрузке (только для мобильных)
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -414,56 +410,37 @@
         }
 
         function handleLike() {
-            // Увеличиваем общий счетчик лайков и счетчик пользователя
+            // Увеличиваем общий счетчик лайков
             likes++;
-            userLikes++;
             localStorage.setItem('likes', likes);
-            localStorage.setItem('userLikes', userLikes);
             
             // Показываем спойлер
             showSpoiler();
             
-            // Обновляем отображение
+            // Обновляем отображение счетчика
             updateRatingDisplay();
-            updateButtonStates();
+            
+            // Обновляем состояние кнопки
+            document.getElementById('likeBtn').classList.add('liked');
+            document.getElementById('likeBtn').textContent = '❤️ Лайкъ поставлен';
         }
 
         function handleDislike() {
-            // Увеличиваем общий счетчик дизлайков и счетчик пользователя
+            // Увеличиваем общий счетчик дизлайков
             dislikes++;
-            userDislikes++;
             localStorage.setItem('dislikes', dislikes);
-            localStorage.setItem('userDislikes', userDislikes);
             
-            // Обновляем отображение
+            // Обновляем отображение счетчика
             updateRatingDisplay();
-            updateButtonStates();
+            
+            // Обновляем состояние кнопки
+            document.getElementById('dislikeBtn').classList.add('disliked');
+            document.getElementById('dislikeBtn').textContent = '👎 Дизлайкъ поставлен';
         }
 
         function updateRatingDisplay() {
             document.getElementById('likeCount').textContent = likes;
             document.getElementById('dislikeCount').textContent = dislikes;
-        }
-
-        function updateButtonStates() {
-            const likeBtn = document.getElementById('likeBtn');
-            const dislikeBtn = document.getElementById('dislikeBtn');
-            
-            // Сбрасываем состояния
-            likeBtn.classList.remove('liked');
-            dislikeBtn.classList.remove('disliked');
-            
-            // Обновляем текст кнопок
-            likeBtn.textContent = '❤️ Лайк';
-            dislikeBtn.textContent = '👎 Дизлайк';
-            
-            // Добавляем классы для активных состояний
-            if (userLikes > 0) {
-                likeBtn.classList.add('liked');
-            }
-            if (userDislikes > 0) {
-                dislikeBtn.classList.add('disliked');
-            }
         }
 
         function addComment() {
@@ -503,7 +480,8 @@
             const commentsList = document.getElementById('commentsList');
             commentsList.innerHTML = '';
             
-            comments.forEach(comment => {
+            // Показываем все комментарии в обратном порядке (новые сверху)
+            comments.slice().reverse().forEach(comment => {
                 const commentElement = document.createElement('div');
                 commentElement.className = `comment ${comment.authorClass}`;
                 commentElement.innerHTML = `
