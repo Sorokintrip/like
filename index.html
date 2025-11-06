@@ -371,11 +371,11 @@
         <div class="rating-container">
             <div class="rating-item">
                 <div class="rating-count" id="likeCount">0</div>
-                <button class="like-btn" id="likeBtn" onclick="handleLike()">❤️ Лайк</button>
+                <button class="like-btn" id="likeBtn" onclick="handleLike()">❤️ Лайкъ</button>
             </div>
             <div class="rating-item">
                 <div class="rating-count" id="dislikeCount">0</div>
-                <button class="dislike-btn" id="dislikeBtn" onclick="handleDislike()">👎 Дизлайк</button>
+                <button class="dislike-btn" id="dislikeBtn" onclick="handleDislike()">👎 Дизлайкъ</button>
             </div>
         </div>
         
@@ -540,8 +540,8 @@
             dislikeBtn.classList.remove('disliked');
             
             // Обновляем текст кнопок
-            likeBtn.textContent = userLikes > 0 ? `❤️ Лайк (${userLikes})` : '❤️ Лайк';
-            dislikeBtn.textContent = userDislikes > 0 ? `👎 Дизлайк (${userDislikes})` : '👎 Дизлайк';
+            likeBtn.textContent = userLikes > 0 ? `❤️ Лайкъ (${userLikes})` : '❤️ Лайкъ';
+            dislikeBtn.textContent = userDislikes > 0 ? `👎 Дизлайкъ (${userDislikes})` : '👎 Дизлайкъ';
             
             // Добавляем классы для активных состояний
             if (userLikes > 0) {
@@ -607,4 +607,72 @@
         }
 
         // Защита от просмотра исходного кода
-        document.addEventListener(
+        document.addEventListener('keydown', function(e) {
+            // Блокировка F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Блокировка Ctrl+U (просмотр исходного кода)
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Блокировка Ctrl+Shift+I (инструменты разработчика)
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Блокировка Ctrl+Shift+C (инспектор элементов)
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Блокировка правой кнопки мыши
+            if (e.button === 2) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Блокировка контекстного меню
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Защита от копирования текста
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            alert('Копирование запрещено!');
+            return false;
+        });
+
+        // Защита от открытия инструментов разработчика (только для ПК)
+        if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            setInterval(function() {
+                if (window.outerHeight - window.innerHeight > 200 || 
+                    window.outerWidth - window.innerWidth > 200) {
+                    window.close();
+                    window.location.href = 'about:blank';
+                }
+            }, 1000);
+        }
+
+        // Предотвращение выхода из полноэкранного режима (только для мобильных)
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('Ошибка полноэкранного режима:', err);
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
