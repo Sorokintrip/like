@@ -120,12 +120,6 @@
             transform: scale(1.05);
         }
         
-        .like-btn:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
         .dislike-btn {
             background-color: #dc3545;
             color: white;
@@ -138,12 +132,6 @@
         .dislike-btn.disliked {
             background-color: #6c757d;
             transform: scale(1.05);
-        }
-        
-        .dislike-btn:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-            transform: none;
         }
         
         .spoiler-text {
@@ -277,24 +265,6 @@
                 font-size: 13px;
             }
         }
-        
-        .user-stats {
-            margin: 10px 0;
-            font-size: 14px;
-            color: #666;
-            text-align: center;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        /* Адаптивная статистика */
-        @media (max-width: 480px) {
-            .user-stats {
-                font-size: 13px;
-                padding: 6px;
-            }
-        }
 
         /* Цвета для разных авторов */
         .author-lenin { color: #dc3545; border-left-color: #dc3545; }
@@ -335,16 +305,6 @@
                 text-size-adjust: 100%;
             }
         }
-
-        .instruction {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 14px;
-            color: #856404;
-        }
     </style>
 </head>
 <body>
@@ -360,22 +320,18 @@
             <div class="spoiler-text">пойреволюция</div>
         </div>
         
-        <div class="user-stats" id="userStats">
-            <!-- Статистика пользователя будет здесь -->
-        </div>
-        
         <div class="rating-container">
             <div class="rating-item">
                 <div class="rating-count" id="likeCount">0</div>
-                <button class="like-btn" id="likeBtn" onclick="handleLike()">❤️ Лайкъ</button>
+                <button class="like-btn" id="likeBtn" onclick="handleLike()">❤️ Лайк</button>
             </div>
             <div class="rating-item">
                 <div class="rating-count" id="dislikeCount">0</div>
-                <button class="dislike-btn" id="dislikeBtn" onclick="handleDislike()">👎 Дизлайкъ</button>
+                <button class="dislike-btn" id="dislikeBtn" onclick="handleDislike()">👎 Дизлайк</button>
             </div>
         </div>
         
-        <div class="comments-section" id="commentsSection" class="hidden">
+        <div class="comments-section">
             <div class="comments-title">Комментарии</div>
             
             <div class="comment-form">
@@ -405,8 +361,7 @@
         let dislikes = localStorage.getItem('dislikes') ? parseInt(localStorage.getItem('dislikes')) : 0;
         let userLikes = localStorage.getItem('userLikes') ? parseInt(localStorage.getItem('userLikes')) : 0;
         let userDislikes = localStorage.getItem('userDislikes') ? parseInt(localStorage.getItem('userDislikes')) : 0;
-        let hasSeenSpoiler = localStorage.getItem('hasSeenSpoiler') === 'true';
-
+        
         let comments = JSON.parse(localStorage.getItem('comments')) || [
             { author: "Ленин", authorClass: "author-lenin", text: "Всякая революция лишь тогда чего-нибудь стоит, если она умеет защищаться!" },
             { author: "Сталин", authorClass: "author-stalin", text: "Жить стало лучше, жить стало веселее!" },
@@ -424,19 +379,12 @@
 
         // Загрузка данных при старте
         document.addEventListener('DOMContentLoaded', function() {
+            // Всегда показываем фото при загрузке страницы
+            showPhotoOnly();
+            
+            // Всегда показываем общие счетчики и комментарии
             updateRatingDisplay();
-            updateUserStats();
-            
-            // Проверяем, видел ли пользователь спойлер
-            if (hasSeenSpoiler) {
-                // Если видел - показываем спойлер и комментарии
-                showSpoilerAndComments();
-            } else {
-                // Если не видел - показываем только фото и инструкцию
-                showPhotoOnly();
-            }
-            
-            // Обновляем состояние кнопок
+            displayComments();
             updateButtonStates();
             
             // Автоматический запрос полноэкранного режима при загрузке (только для мобильных)
@@ -452,24 +400,17 @@
         function showPhotoOnly() {
             document.getElementById('photoContainer').classList.remove('hidden');
             document.getElementById('spoilerContainer').classList.add('hidden');
-            document.getElementById('instruction').classList.remove('hidden');
-            document.getElementById('commentsSection').classList.add('hidden');
-            
-            // Включаем кнопки
-            document.getElementById('likeBtn').disabled = false;
-            document.getElementById('dislikeBtn').disabled = false;
         }
 
-        function showSpoilerAndComments() {
+        function showSpoiler() {
             document.getElementById('photoContainer').classList.add('hidden');
             document.getElementById('spoilerContainer').classList.remove('hidden');
-            document.getElementById('instruction').classList.add('hidden');
-            document.getElementById('commentsSection').classList.remove('hidden');
-            displayComments();
             
-            // Отключаем кнопки после просмотра спойлера
-            document.getElementById('likeBtn').disabled = true;
-            document.getElementById('dislikeBtn').disabled = true;
+            // Дополнительная защита - шифруем текст спойлера
+            setTimeout(() => {
+                const spoilerText = document.querySelector('.spoiler-text');
+                spoilerText.textContent = 'пойреволюция';
+            }, 100);
         }
 
         function handleLike() {
@@ -479,21 +420,12 @@
             localStorage.setItem('likes', likes);
             localStorage.setItem('userLikes', userLikes);
             
-            // Показываем спойлер и комментарии
-            hasSeenSpoiler = true;
-            localStorage.setItem('hasSeenSpoiler', 'true');
-            showSpoilerAndComments();
+            // Показываем спойлер
+            showSpoiler();
             
             // Обновляем отображение
             updateRatingDisplay();
-            updateUserStats();
             updateButtonStates();
-            
-            // Дополнительная защита - шифруем текст спойлера
-            setTimeout(() => {
-                const spoilerText = document.querySelector('.spoiler-text');
-                spoilerText.textContent = 'пойреволюция';
-            }, 100);
         }
 
         function handleDislike() {
@@ -505,24 +437,12 @@
             
             // Обновляем отображение
             updateRatingDisplay();
-            updateUserStats();
             updateButtonStates();
-
         }
 
         function updateRatingDisplay() {
             document.getElementById('likeCount').textContent = likes;
             document.getElementById('dislikeCount').textContent = dislikes;
-        }
-
-        function updateUserStats() {
-            const userStats = document.getElementById('userStats');
-            if (userLikes > 0 || userDislikes > 0) {
-                userStats.innerHTML = `Ваши голоса: ❤️ ${userLikes} | 👎 ${userDislikes}`;
-                userStats.classList.remove('hidden');
-            } else {
-                userStats.classList.add('hidden');
-            }
         }
 
         function updateButtonStates() {
@@ -534,8 +454,8 @@
             dislikeBtn.classList.remove('disliked');
             
             // Обновляем текст кнопок
-            likeBtn.textContent = userLikes > 0 ? `❤️ Лайкъ (${userLikes})` : '❤️ Лайкъ';
-            dislikeBtn.textContent = userDislikes > 0 ? `👎 Дизлайкъ (${userDislikes})` : '👎 Дизлайкъ';
+            likeBtn.textContent = '❤️ Лайк';
+            dislikeBtn.textContent = '👎 Дизлайк';
             
             // Добавляем классы для активных состояний
             if (userLikes > 0) {
@@ -543,12 +463,6 @@
             }
             if (userDislikes > 0) {
                 dislikeBtn.classList.add('disliked');
-            }
-            
-            // Отключаем кнопки после просмотра спойлера
-            if (hasSeenSpoiler) {
-                likeBtn.disabled = true;
-                dislikeBtn.disabled = true;
             }
         }
 
